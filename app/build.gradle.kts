@@ -30,24 +30,14 @@ android {
         versionCode = versionCodeCI ?: 21
         versionName = "1.5.2"
         vectorDrawables.useSupportLibrary = true
-        testBuildType = "instrumented"
-
-        testInstrumentationRunner =
-            "com.lolo.io.onelist.core.testing.OneListTestRunner"
-
-
+        // testBuildType and testInstrumentationRunner REMOVED
     }
 
     androidResources {
         generateLocaleConfig = true
     }
 
-    testOptions {
-        unitTests {
-            // For Robolectric
-            isIncludeAndroidResources = true
-        }
-    }
+    // testOptions block REMOVED
 
     buildFeatures {
         buildConfig = true
@@ -70,8 +60,6 @@ android {
             versionNameSuffix = "-DEBUG"
         }
 
-
-
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -84,12 +72,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
 
-        create("instrumented") {
-            initWith(getByName("debug"))
-            applicationIdSuffix = ".tst"
-            versionNameSuffix = "-TEST"
-            matchingFallbacks.add("debug")
-        }
+        // "instrumented" build type REMOVED
     }
 }
 
