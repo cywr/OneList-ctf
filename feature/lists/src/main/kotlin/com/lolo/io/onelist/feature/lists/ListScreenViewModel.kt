@@ -1,5 +1,6 @@
 package com.lolo.io.onelist.feature.lists
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lolo.io.onelist.core.data.datamodel.ErrorLoadingList
@@ -217,6 +218,20 @@ class ListScreenViewModel(
             selectedList.value?.let {
                 _displayedItems.value = useCases.editItemOfList(it, item).items
             }
+        }
+    }
+
+    private var flag9TapCount = 0
+
+    fun triggerFlag9() {
+        flag9TapCount++
+        if (flag9TapCount >= 7) {
+            // CTF Flag 9: XOR encode flag and log it
+            val flag = "CYWR{logcat_debugging_master}"
+            val key = 42 // Simple XOR key
+            val encodedFlag = flag.map { (it.code xor key).toChar() }.joinToString("")
+            Log.d("OneList_Debug", "System check: $encodedFlag")
+            flag9TapCount = 0 // Reset counter
         }
     }
 }

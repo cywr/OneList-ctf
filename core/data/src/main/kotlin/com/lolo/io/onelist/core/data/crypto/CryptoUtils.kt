@@ -1,0 +1,105 @@
+package com.lolo.io.onelist.core.data.crypto
+
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.util.Base64
+import java.security.MessageDigest
+import javax.crypto.Cipher
+import javax.crypto.spec.SecretKeySpec
+import javax.crypto.spec.IvParameterSpec
+
+object CryptoUtils {
+    
+    private const val ALGORITHM = "AES"
+    private const val TRANSFORMATION = "AES/CBC/PKCS5Padding"
+    
+    fun deriveKey(context: Context): String {
+        // Derive key from multiple sources
+        val appSignature = getAppSignature(context)
+        val deviceInfo = getDeviceInfo()
+        val buildInfo = getBuildInfo()
+        
+        // Combine all sources
+        val keyMaterial = "$appSignature$deviceInfo$buildInfo"
+        
+        // Hash to create 256-bit key
+        val digest = MessageDigest.getInstance("SHA-256")
+        val keyBytes = digest.digest(keyMaterial.toByteArray())
+        
+        return Base64.encodeToString(keyBytes, Base64.NO_WRAP)
+    }
+    
+    private fun getAppSignature(context: Context): String {
+        return try {
+            val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                context.packageManager.getPackageInfo(
+                    context.packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageInfo(
+                    context.packageName,
+                    PackageManager.GET_SIGNATURES
+                )
+            }
+            
+            val signature = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                packageInfo.signingInfo?.apkContentsSigners?.firstOrNull()?.toCharsString()
+            } else {
+                @Suppress("DEPRECATION")
+                packageInfo.signatures?.firstOrNull()?.toCharsString()
+            }
+            
+            signature ?: "default_signature"
+        } catch (e: Exception) {
+            "fallback_signature"
+        }
+    }
+    
+    private fun getDeviceInfo(): String {
+        return "${Build.MANUFACTURER}_${Build.MODEL}_${Build.FINGERPRINT}".take(32)
+    }
+    
+    private fun getBuildInfo(): String {
+        return "${Build.VERSION.SDK_INT}_${Build.VERSION.RELEASE}".take(16)
+    }
+    
+    fun encryptFlag(plaintext: String, key: String): String {
+        return try {
+            val keyBytes = Base64.decode(key, Base64.NO_WRAP)
+            val secretKey = SecretKeySpec(keyBytes, ALGORITHM)
+            
+            val cipher = Cipher.getInstance(TRANSFORMATION)
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+            
+            val iv = cipher.iv
+            val encryptedBytes = cipher.doFinal(plaintext.toByteArray())
+            
+            val combined = iv + encryptedBytes
+            Base64.encodeToString(combined, Base64.NO_WRAP)
+        } catch (e: Exception) {
+            "encryption_failed"
+        }
+    }
+    
+    fun decryptFlag(encryptedText: String, key: String): String {
+        return try {
+            val keyBytes = Base64.decode(key, Base64.NO_WRAP)
+            val secretKey = SecretKeySpec(keyBytes, ALGORITHM)
+            
+            val combined = Base64.decode(encryptedText, Base64.NO_WRAP)
+            val iv = combined.sliceArray(0..15)  // AES block size is 16 bytes
+            val encrypted = combined.sliceArray(16 until combined.size)
+            
+            val cipher = Cipher.getInstance(TRANSFORMATION)
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(iv))
+            
+            val decryptedBytes = cipher.doFinal(encrypted)
+            String(decryptedBytes)
+        } catch (e: Exception) {
+            "decryption_failed"
+        }
+    }
+}

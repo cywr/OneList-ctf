@@ -1,36 +1,77 @@
-# <img src="fastlane/metadata/android/en-US/images/icon.png" width="32" /> 1List
+# 🎯 OneList CTF Challenge
 
-1List is a simple app to manage several lists from only one screen.
+Welcome to the OneList Android Reverse Engineering CTF! This application contains **10 hidden flags** with the format `CYWR{...}` that progressively increase in difficulty.
 
-## Download :
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/com.lolo.io.onelist/)
-[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="80">](https://play.google.com/store/apps/details?id=com.lolo.io.onelist)
+## 🚀 Getting Started
 
-## Target platforms :
+1. Install the APK on an Android device or emulator
+2. Use your favorite reverse engineering tools (jadx, apktool, frida, etc.)
+3. Find all 10 flags to complete the challenge!
 
-API 23 or later
+## 📋 Challenge Overview
 
-## Features :
+**Target:** Find 10 flags in total
+**Format:** `CYWR{flag_content_here}`
+**Difficulty:** Beginner → Expert
 
--   User friendly lists management and smooth navigation
--   Add, delete, edit items in your lists
--   Move items within your lists
--   Mark items as done or undone
--   Add comments on each items
--   Create an unlimited number of lists
--   Move, edit, remove your lists
--   ... more to come in the near future
+## 💡 Hints & Tips
 
-## Screenshots :
+### 🔍 Static Analysis (Flags 1-5)
+**Tools:** jadx, apktool, strings, grep, hex editors
 
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screen1.png" width="150" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screen2.png" width="150" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screen3.png" width="150" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screen4.png" width="150" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screen5.png" width="150" />
+- **Flag 1**: Start with the basics - sometimes the simplest approach works
+- **Flag 2**: Not all builds are created equal - check different build variants
+- **Flag 3**: Developers often leave breadcrumbs in utility classes
+- **Flag 4**: Database migrations can contain interesting comments
+- **Flag 5**: Manifest files hold more than just permissions
 
-## Donations :
+### 🏃 Dynamic Analysis (Flags 6-10)
+**Tools:** frida, adb logcat, sqlite3, objection, dynamic analysis
 
-[<img src="https://upload.wikimedia.org/wikipedia/commons/7/76/577-beer-mug.svg?sanitize=true"
-     alt="Beer"
-     height="20"> Buy me a beer](https://www.paypal.com/donate/?business=Z32JPDRAJV2ZQ&no_recurring=0&item_name=1List+App&currency_code=EUR)
+- **Flag 6**: Your actions in the app matter - try creating and managing lists
+- **Flag 7**: Some flags only appear when you follow specific patterns with your data
+- **Flag 8**: Settings screens sometimes hide developer options - persistence pays off
+- **Flag 9**: The app title isn't just decorative - try different interaction methods
+- **Flag 10**: The ultimate challenge requires understanding cryptography and runtime behavior
+
+## 🛠️ Recommended Tools
+
+### Static Analysis
+- **jadx** - Java decompiler for Android APK
+- **apktool** - Resource extraction and analysis
+- **strings** - Extract string constants
+- **grep/ripgrep** - Search through code
+- **hexdump/xxd** - Binary analysis
+
+### Dynamic Analysis
+- **frida** - Runtime instrumentation
+- **adb logcat** - Monitor application logs
+- **adb shell** - Access device filesystem and databases
+- **sqlite3** - Inspect SQLite databases
+- **objection** - Runtime mobile exploration
+
+## 🎓 Learning Objectives
+
+This CTF will teach you:
+- Android APK analysis techniques
+- Static vs dynamic analysis approaches
+- Common encoding schemes (Base64, ROT13, Hex, XOR)
+- Android-specific reverse engineering (SharedPreferences, Room databases)
+- Advanced techniques (DexClassLoader, reflection, cryptography)
+- Runtime instrumentation and debugging
+
+## ⚡ Progressive Difficulty
+
+- **Flags 1-2**: Basic static analysis
+- **Flags 3-5**: Encoded content and hidden resources
+- **Flags 6-7**: Runtime behavior and data storage
+- **Flags 8-10**: Advanced techniques and cryptography
+
+## 🏆 Completion
+
+Once you find all 10 flags, you've mastered Android reverse engineering fundamentals!
+
+Good luck, and happy hacking! 🔓
+
+---
+*This CTF is based on the open-source 1List application for educational purposes.*

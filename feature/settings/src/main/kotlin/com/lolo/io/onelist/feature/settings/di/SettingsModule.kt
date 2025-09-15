@@ -6,6 +6,6 @@ import org.koin.dsl.module
 
 val settingsModule = module {
     viewModel<SettingsFragmentViewModel>{
-        SettingsFragmentViewModel(get(), get())
+        SettingsFragmentViewModel(get(), get(), get())
     }
 }

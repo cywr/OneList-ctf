@@ -83,6 +83,18 @@ class SharedPreferencesHelperImpl(
             DocumentFileCompat.fromUri(app, Uri.parse(it))?.canWrite() ?: false
         } != false
 
+    override var ctfListsCreated: Int
+        get() = SharedPreferencesHelper.CTF_LISTS_CREATED.getPref(0)
+        set(value) = SharedPreferencesHelper.CTF_LISTS_CREATED.editPref(value)
+
+    override var ctfListsDeleted: Int
+        get() = SharedPreferencesHelper.CTF_LISTS_DELETED.getPref(0)
+        set(value) = SharedPreferencesHelper.CTF_LISTS_DELETED.editPref(value)
+
+    override var ctfFlag6: String?
+        get() = getPref(SharedPreferencesHelper.CTF_FLAG_6)
+        set(value) = editPref(SharedPreferencesHelper.CTF_FLAG_6, value)
+
 
     private fun getDefaultTheme(): String {
         return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P)

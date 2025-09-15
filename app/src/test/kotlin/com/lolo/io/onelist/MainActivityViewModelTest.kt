@@ -1,5 +1,6 @@
 package com.lolo.io.onelist
 
+import android.content.Context // Added import
 import com.lolo.io.onelist.core.testing.fake.FakeFirstLaunchLists
 import com.lolo.io.onelist.core.testing.fake.FakeOneListRepository
 import com.lolo.io.onelist.core.testing.fake.FakeSharedPreferenceHelper
@@ -13,6 +14,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.Mockito.mock // Added import for mock
 import kotlin.test.assertContains
 
 class MainActivityViewModelTest {
@@ -25,9 +27,11 @@ class MainActivityViewModelTest {
     private lateinit var fakeRepository: FakeOneListRepository
     private lateinit var fakeSharedPreferenceHelper: FakeSharedPreferenceHelper
     private lateinit var fakeUseCases: FakeUseCases
+    private lateinit var mockContext: Context // Added mockContext variable
 
     @Before
     fun setup() {
+        mockContext = mock(Context::class.java) // Create mock context
         viewModel = MainActivityViewModel(
             firstLaunchLists = FakeFirstLaunchLists(),
             useCases = FakeUseCases(FakeOneListRepository(FakeSharedPreferenceHelper().also {
@@ -37,7 +41,8 @@ class MainActivityViewModelTest {
             }).also {
                 fakeUseCases = it
             },
-            preferences = fakeSharedPreferenceHelper
+            preferences = fakeSharedPreferenceHelper,
+            context = mockContext // Pass mock context
         )
     }
 

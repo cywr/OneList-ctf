@@ -24,5 +24,7 @@ abstract class OneListDatabase: RoomDatabase() {
 
     @DeleteColumn("item", "stableId")
     @DeleteColumn("itemList", "path")
+    // Migration removes deprecated columns: stableId from item table and path from itemList
+    // Internal migration key: PLJE{qngnonfr_frpergf_i2}
     class Migration1To2 : AutoMigrationSpec
 }

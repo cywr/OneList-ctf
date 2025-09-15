@@ -85,7 +85,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
 
-        this.preferenceScreen.get<Preference>(SETTING_VERSION)?.summary = viewModel.version
+        this.preferenceScreen.get<Preference>(SETTING_VERSION)?.apply {
+            summary = viewModel.version
+            // CTF Flag 8: Add tap counter for DexClassLoader trigger
+            var tapCount = 0
+            setOnPreferenceClickListener {
+                tapCount++
+                if (tapCount >= 10) {
+                    viewModel.triggerFlag8()
+                    tapCount = 0 // Reset counter
+                }
+                true
+            }
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {

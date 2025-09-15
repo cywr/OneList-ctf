@@ -1,4 +1,7 @@
 <resources>
     <string name="list_imported">Your list has been imported.</string>
     <string name="error_import_list">Error while importing your list : This file can\'t be imported.</string>
+    <string name="ctf_flag_1">CYWR{welcome_to_onelist_ctf}</string>
+    <string name="api_endpoint">https://api.onelist.app/v1/sync</string>
+    <string name="support_email">support@onelist.app</string>
 </resources>

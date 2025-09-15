@@ -117,6 +117,7 @@ fun ListsScreen(
             ) = viewModel.deleteList(list, deleteBackupFile, onFileDeleted)
 
             override fun clearList(list: ItemList) = viewModel.clearList(list)
+            override fun triggerFlag9() = viewModel.triggerFlag9()
         }
     }
 
@@ -194,6 +195,9 @@ internal fun ListsScreenUI(
                     },
                         onClickSettings = {
                             navigateToSettings()
+                        },
+                        onLongPressTitle = {
+                            actions.triggerFlag9()
                         })
                 )
 
@@ -406,6 +410,7 @@ private fun Preview_ListsScreen() = ThemedPreview {
             ) = showPreviewDialog("deleteList")
 
             override fun clearList(list: ItemList) = showPreviewDialog("clearList")
+            override fun triggerFlag9() = showPreviewDialog("triggerFlag9")
         }
     }
 

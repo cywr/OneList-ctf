@@ -3,6 +3,7 @@ package com.lolo.io.onelist.core.data.utils
 object TestTags {
 
     const val SwipeableItem = "swipeable_item"
+    const val InternalConfig = "Q1lXUnt0ZXN0X3RhZ3NfYXJlX3VzZWZ1bH0="
     const val EditItemDialog = "edit-item-dialog"
     const val EditItemDialogItemTitle = "edit-item-dialog-item-title"
     const val EditItemDialogItemComment = "edit-item-dialog-item-comment"

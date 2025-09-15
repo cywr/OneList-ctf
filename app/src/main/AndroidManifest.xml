@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name="com.lolo.io.onelist.App"
@@ -14,6 +15,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppThemeLauncher"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+        
+        <meta-data
+            android:name="com.onelist.internal.config"
+            android:value="435957527b6d616e69666573745f7065726d697373696f6e735f6d617474657d" />
+        <meta-data
+            android:name="com.onelist.api.version"
+            android:value="v1.5.2" />
         <activity
             android:name="com.lolo.io.onelist.MainActivity"
             android:exported="true">

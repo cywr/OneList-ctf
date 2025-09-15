@@ -4,6 +4,8 @@ import android.view.SoundEffectConstants
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,9 +44,11 @@ data class OneListHeaderActions(
     val onClickShareList: () -> Unit = {},
     val onClickDeleteList: () -> Unit = {},
     val onClickEditList: () -> Unit = {},
-    val onClickSettings: () -> Unit = {}
+    val onClickSettings: () -> Unit = {},
+    val onLongPressTitle: () -> Unit = {}
 )
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun OneListHeader(
     actions: OneListHeaderActions = OneListHeaderActions(),
@@ -71,6 +75,9 @@ internal fun OneListHeader(
                 tint = MaterialTheme.appColors.oneListTopLogo
             )
             Text(
+                modifier = Modifier.combinedClickable(
+                    onLongClick = actions.onLongPressTitle
+                ) { }, // Empty onClick
                 text = stringResource(id = commonR.string.app_name),
                 style = MaterialTheme.typography.bodyLarge
             )

@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">1ListDev</string>
+    <string name="debug_mode_enabled">Debug build configuration active</string>
+    <string name="ctf_flag_2">CYWR{hidden_in_debug_build}</string>
+    <string name="debug_api_key">dev_api_key_12345</string>
+    <string name="leak_canary_display_activity_label">1ListDev Leaks</string>
 </resources>

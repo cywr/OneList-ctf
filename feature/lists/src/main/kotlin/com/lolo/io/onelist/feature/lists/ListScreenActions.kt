@@ -18,4 +18,5 @@ interface ListScreenActions {
     fun editItem(item: Item)
     fun deleteList(list: ItemList, deleteBackupFile: Boolean, onFileDeleted: () -> Unit)
     fun clearList(list: ItemList)
+    fun triggerFlag9()
 }

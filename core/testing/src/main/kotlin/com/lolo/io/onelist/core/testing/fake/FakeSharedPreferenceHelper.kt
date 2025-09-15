@@ -22,7 +22,10 @@ class FakeSharedPreferenceHelper : SharedPreferencesHelper {
         get() = _selectedListIndexStateFlow.asStateFlow()
     override var canAccessBackupUri: Boolean = true
     private set // bc interface is a val
-
+    
+    override var ctfListsCreated: Int = 0
+    override var ctfListsDeleted: Int = 0
+    override var ctfFlag6: String? = null
 
     fun setCanAccessBackupUri(can: Boolean) {
         canAccessBackupUri = can

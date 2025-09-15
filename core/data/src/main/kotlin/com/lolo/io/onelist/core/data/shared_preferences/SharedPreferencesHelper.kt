@@ -12,6 +12,9 @@ interface SharedPreferencesHelper {
         const val THEME_PREF: String = "theme"
         const val FIRST_LAUNCH_PREF = "firstLaunch"
         const val PREFER_USE_FILES_PREF = "preferUseFiles"
+        const val CTF_LISTS_CREATED = "ctf_lists_created"
+        const val CTF_LISTS_DELETED = "ctf_lists_deleted"
+        const val CTF_FLAG_6 = "ctf_flag_6"
 
         const val THEME_AUTO = "auto"
         const val THEME_LIGHT = "light"
@@ -28,4 +31,7 @@ interface SharedPreferencesHelper {
     var selectedListIndex: Int
     val selectedListIndexStateFlow: StateFlow<Int>
     val canAccessBackupUri: Boolean
+    var ctfListsCreated: Int
+    var ctfListsDeleted: Int
+    var ctfFlag6: String?
 }

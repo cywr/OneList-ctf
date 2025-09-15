@@ -92,6 +92,10 @@ class OneListRepositoryImpl(
         _allListsWithErrors.value =
             ListsWithErrors(_allListsWithErrors.value.lists + addedList)
 
+        // CTF Flag 6 tracking
+        preferences.ctfListsCreated += 1
+        checkFlag6Condition()
+
         return addedList
     }
 
@@ -105,6 +109,9 @@ class OneListRepositoryImpl(
             _allListsWithErrors.value = ListsWithErrors(
                 _allListsWithErrors.value.lists.updateOneIf(itemList) { it.id == itemList.id })
         }
+
+        // CTF Flag 7: Check if list named "FLAG" has item "CYWR" marked as done
+        checkFlag7Condition(itemList)
     }
 
 
@@ -153,6 +160,9 @@ class OneListRepositoryImpl(
             ListsWithErrors(_allListsWithErrors.value.lists
                 .filter { it.id != itemList.id })
 
+        // CTF Flag 6 tracking
+        preferences.ctfListsDeleted += 1
+        checkFlag6Condition()
 
         if (deleteBackupFile) {
             fileAccess.deleteListBackupFile(itemList, onFileDeleted)
@@ -211,6 +221,43 @@ class OneListRepositoryImpl(
             preferences.backupUri = null
             preferences.backupDisplayPath = null
             fileAccess.revokeAllAccessFolders()
+        }
+    }
+
+    private fun checkFlag6Condition() {
+        // CTF Flag 6: Trigger when user creates 3 lists and deletes 2
+        if (preferences.ctfListsCreated >= 3 && preferences.ctfListsDeleted >= 2 && preferences.ctfFlag6 == null) {
+            preferences.ctfFlag6 = "CYWR{shared_prefs_ftw}"
+        }
+    }
+
+    private suspend fun checkFlag7Condition(itemList: ItemList) {
+        // CTF Flag 7: Trigger when list named "FLAG" has item "CYWR" marked as done
+        if (itemList.title.equals("FLAG", ignoreCase = true)) {
+            val cyvrItem = itemList.items.find { 
+                it.title.equals("CYWR", ignoreCase = true) && it.done 
+            }
+            if (cyvrItem != null) {
+                // Create a special list entry with the flag
+                val flagList = ItemList(
+                    title = "CYWR{room_database_flag}",
+                    position = -999, // Hidden position
+                    items = listOf(),
+                    id = 999999L // Special ID
+                )
+                withContext(Dispatchers.IO) {
+                    // Only insert if not already exists
+                    val existing = try {
+                        dao.get(999999L)
+                        true
+                    } catch (e: Exception) {
+                        false
+                    }
+                    if (!existing) {
+                        dao.upsert(flagList.toItemListEntity())
+                    }
+                }
+            }
         }
     }
 }
