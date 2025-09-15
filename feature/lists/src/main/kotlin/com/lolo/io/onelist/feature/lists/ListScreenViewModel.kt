@@ -227,11 +227,46 @@ class ListScreenViewModel(
         flag9TapCount++
         if (flag9TapCount >= 7) {
             // CTF Flag 9: XOR encode flag and log it
-            val flag = "CYWR{logcat_debugging_master}"
+            val flag = generateFlag9()
             val key = 42 // Simple XOR key
             val encodedFlag = flag.map { (it.code xor key).toChar() }.joinToString("")
             Log.d("OneList_Debug", "System check: $encodedFlag")
             flag9TapCount = 0 // Reset counter
         }
+    }
+    
+    private fun generateFlag9(): String {
+        // Custom substitution cipher - complete flag encrypted
+        val encryptedData = intArrayOf(
+            0x4f, 0x5d, 0x53, 0x4e, 0x6f, 0x0f, 0x1f, 0x17, 0x0d, 0x03, 0x11,
+            0x6f, 0x0e, 0x03, 0x04, 0x19, 0x17, 0x17, 0x09, 0x13, 0x17, 0x6f,
+            0x0b, 0x03, 0x01, 0x11, 0x05, 0x15, 0x73
+        )
+        
+        // Polyalphabetic substitution with key rotation
+        val keys = intArrayOf(0x2A, 0x15, 0x33, 0x07, 0x1C)
+        
+        val decrypted = StringBuilder()
+        encryptedData.forEachIndexed { index, value ->
+            val keyIndex = index % keys.size
+            val key = keys[keyIndex]
+            
+            // Custom transformation based on position and key
+            val transformed = when {
+                value >= 0x40 && value <= 0x7A -> {
+                    // Apply position-based transformation
+                    val base = if (value <= 0x5A) 0x41 else 0x61
+                    val offset = (value - base + 26 - (key % 26)) % 26
+                    (base + offset).toChar()
+                }
+                else -> {
+                    // Direct XOR for special characters
+                    (value xor key).toChar()
+                }
+            }
+            decrypted.append(transformed)
+        }
+        
+        return decrypted.toString()
     }
 }

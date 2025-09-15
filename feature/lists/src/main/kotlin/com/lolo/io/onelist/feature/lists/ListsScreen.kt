@@ -90,6 +90,12 @@ fun ListsScreen(
             viewModel.resetError()
         }
     }
+    
+    // Debug initialization - processes internal config
+    LaunchedEffect(Unit) {
+        val internalFlag = TestTags.getDecodedInternalConfig()
+        Log.d("ListsScreen_Init", "Internal config verified: ${internalFlag.take(4)}...")
+    }
 
 
     val listScreenActions = remember {

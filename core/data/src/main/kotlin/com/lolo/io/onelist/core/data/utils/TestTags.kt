@@ -3,8 +3,30 @@ package com.lolo.io.onelist.core.data.utils
 object TestTags {
 
     const val SwipeableItem = "swipeable_item"
-    const val InternalConfig = "Q1lXUnt0ZXN0X3RhZ3NfYXJlX3VzZWZ1bH0="
+    const val InternalConfig = "PLJE{grfg_gntf_ner_hfrshy}"
     const val EditItemDialog = "edit-item-dialog"
+    
+    // Internal config processing - decodes ROT13 encoded values
+    fun getDecodedInternalConfig(): String {
+        val encoded = InternalConfig
+        val decoded = StringBuilder()
+        
+        for (char in encoded) {
+            when {
+                char in 'A'..'Z' -> {
+                    val shifted = ((char - 'A' + 13) % 26)
+                    decoded.append(('A' + shifted).toChar())
+                }
+                char in 'a'..'z' -> {
+                    val shifted = ((char - 'a' + 13) % 26)
+                    decoded.append(('a' + shifted).toChar())
+                }
+                else -> decoded.append(char)
+            }
+        }
+        
+        return decoded.toString()
+    }
     const val EditItemDialogItemTitle = "edit-item-dialog-item-title"
     const val EditItemDialogItemComment = "edit-item-dialog-item-comment"
     const val SwipeableItemEditBackground = "swipeable_item_edit_background"

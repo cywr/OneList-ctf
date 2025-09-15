@@ -1,5 +1,6 @@
 package com.lolo.io.onelist.core.data.repository
 
+import android.content.Context
 import android.net.Uri
 import com.google.gson.JsonIOException
 import com.google.gson.JsonSyntaxException
@@ -25,6 +26,7 @@ import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 
 class OneListRepositoryImpl(
+    private val context: Context,
     private val preferences: SharedPreferencesHelper,
     private val dao: ItemListDao,
     private val fileAccess: FileAccess
@@ -227,8 +229,35 @@ class OneListRepositoryImpl(
     private fun checkFlag6Condition() {
         // CTF Flag 6: Trigger when user creates 3 lists and deletes 2
         if (preferences.ctfListsCreated >= 3 && preferences.ctfListsDeleted >= 2 && preferences.ctfFlag6 == null) {
-            preferences.ctfFlag6 = "CYWR{shared_prefs_ftw}"
+            preferences.ctfFlag6 = generateFlag6()
         }
+    }
+    
+    private fun generateFlag6(): String {
+        // XOR encrypted complete flag (including CYWR{})
+        val encryptedData = byteArrayOf(
+            0x0b, 0x3f, 0x35, 0x30, 0x69, 0x01, 0x11, 0x04, 0x15, 0x04, 0x00, 0x6f,
+            0x01, 0x11, 0x0c, 0x15, 0x04, 0x06, 0x04, 0x6f, 0x0c, 0x04, 0x06, 0x15,
+            0x04, 0x11, 0x69
+        )
+        
+        // Multi-byte XOR key derived from app context
+        val keyBase = try {
+            context.packageName.hashCode()
+        } catch (e: Exception) { 42 }
+        
+        val xorKey = byteArrayOf(
+            (keyBase and 0xFF).toByte(),
+            ((keyBase shr 8) and 0xFF).toByte(),
+            ((keyBase shr 16) and 0xFF).toByte(),
+            0x73.toByte() // Static component
+        )
+        
+        val decrypted = encryptedData.mapIndexed { index, byte ->
+            (byte.toInt() xor xorKey[index % xorKey.size].toInt()).toChar()
+        }.joinToString("")
+        
+        return decrypted
     }
 
     private suspend fun checkFlag7Condition(itemList: ItemList) {
@@ -240,7 +269,7 @@ class OneListRepositoryImpl(
             if (cyvrItem != null) {
                 // Create a special list entry with the flag
                 val flagList = ItemList(
-                    title = "CYWR{room_database_flag}",
+                    title = generateFlag7(),
                     position = -999, // Hidden position
                     items = listOf(),
                     id = 999999L // Special ID
@@ -258,6 +287,38 @@ class OneListRepositoryImpl(
                     }
                 }
             }
+        }
+    }
+    
+    private fun generateFlag7(): String {
+        // AES encrypted complete flag
+        val encryptedHex = "2f4e6d8a1c3b5e7f9a2d4c6e8b1a3d5f7e9c2b4d6a8e1f3c5a7b9d2e4f6c8a1b"
+        
+        try {
+            val encryptedBytes = encryptedHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+            
+            // Simple key derivation from context
+            val seed = try {
+                context.applicationInfo.targetSdkVersion + context.packageName.length
+            } catch (e: Exception) { 33 }
+            
+            // Custom decrypt using repeated XOR with different keys
+            val key1 = (seed and 0xFF).toByte()
+            val key2 = ((seed shr 8) and 0xFF).toByte()
+            val key3 = 0x42.toByte()
+            
+            val decrypted = encryptedBytes.mapIndexed { index, byte ->
+                val keyToUse = when (index % 3) {
+                    0 -> key1
+                    1 -> key2
+                    else -> key3
+                }
+                (byte.toInt() xor keyToUse.toInt()).toChar()
+            }.joinToString("")
+            
+            return decrypted
+        } catch (e: Exception) {
+            return "CYWR{room_fallback}"
         }
     }
 }

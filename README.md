@@ -21,8 +21,8 @@ Welcome to the OneList Android Reverse Engineering CTF! This application contain
 
 - **Flag 1**: Start with the basics - sometimes the simplest approach works
 - **Flag 2**: Not all builds are created equal - check different build variants
-- **Flag 3**: Developers often leave breadcrumbs in utility classes
-- **Flag 4**: Database migrations can contain interesting comments
+- **Flag 3**: Developers often leave breadcrumbs in utility classes - look for processing functions
+- **Flag 4**: Database configurations need validation - analyze the signature processing logic
 - **Flag 5**: Manifest files hold more than just permissions
 
 ### 🏃 Dynamic Analysis (Flags 6-10)
@@ -55,17 +55,20 @@ Welcome to the OneList Android Reverse Engineering CTF! This application contain
 This CTF will teach you:
 - Android APK analysis techniques
 - Static vs dynamic analysis approaches
-- Common encoding schemes (Base64, ROT13, Hex, XOR)
+- Algorithm discovery through reverse engineering
+- Common encoding schemes (Base64, ROT13, Hex, XOR, custom ciphers)
 - Android-specific reverse engineering (SharedPreferences, Room databases)
 - Advanced techniques (DexClassLoader, reflection, cryptography)
 - Runtime instrumentation and debugging
+- Multi-layer encoding chains and decryption
 
 ## ⚡ Progressive Difficulty
 
-- **Flags 1-2**: Basic static analysis
-- **Flags 3-5**: Encoded content and hidden resources
+- **Flags 1-2**: Basic static analysis and simple encoding
+- **Flags 3-4**: Algorithm discovery and multi-layer encoding
+- **Flag 5**: Hidden resources and manifest analysis
 - **Flags 6-7**: Runtime behavior and data storage
-- **Flags 8-10**: Advanced techniques and cryptography
+- **Flags 8-10**: Advanced techniques, cryptography, and dynamic instrumentation
 
 ## 🏆 Completion
 

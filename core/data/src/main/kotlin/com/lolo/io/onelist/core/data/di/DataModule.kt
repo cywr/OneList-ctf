@@ -15,7 +15,7 @@ val dataModule = module {
     }
 
     single<OneListRepository> {
-        OneListRepositoryImpl(get(), get(), get())
+        OneListRepositoryImpl(get(), get(), get(), get())
     }
 
     single<FileAccess> {
