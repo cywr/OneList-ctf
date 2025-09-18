@@ -75,16 +75,13 @@ class SettingsFragmentViewModel(
         }
     }
 
-    private suspend fun extractDataFromAsset(): String = withContext(Dispatchers.IO) {
+    private suspend fun extractDataFromAsset() = withContext(Dispatchers.IO) {
         try {
             val encryptedData = "vZnAenSqeZZk0z69SDsvOBSggL6DAVnXV3LGGtqGlzk="
             val (secretKey, initVector) = extractKeyAndIvFromResource()
-            val processedData = CryptoUtils.decryptWithKeyAndIv(encryptedData, secretKey, initVector)
-            
-            return@withContext processedData
+            CryptoUtils.decryptWithKeyAndIv(encryptedData, secretKey, initVector)
         } catch (e: Exception) {
             Log.e("OneList_System", "Data processing error", e)
-            return@withContext "processing_failed"
         }
     }
 

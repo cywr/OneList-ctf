@@ -102,88 +102,8 @@ object CryptoUtils {
             "decryption_failed"
         }
     }
-    
-    fun decryptWithStringKey(encryptedText: String, keyString: String): String {
-        return try {
-            // Try mock decryption first (for compatibility with test data)
-            val mockResult = mockDecrypt(encryptedText, keyString)
-            if (mockResult != "mock_decryption_failed") {
-                mockResult
-            } else {
-                // Fallback to real AES decryption
-                realAESDecrypt(encryptedText, keyString)
-            }
-        } catch (e: Exception) {
-            "decryption_failed"
-        }
-    }
-    
-    private fun realAESDecrypt(encryptedText: String, keyString: String): String {
-        return try {
-            val digest = MessageDigest.getInstance("SHA-256")
-            val keyBytes = digest.digest(keyString.toByteArray())
-            val secretKey = SecretKeySpec(keyBytes, ALGORITHM)
-            
-            val combined = Base64.decode(encryptedText, Base64.NO_WRAP)
-            val iv = combined.sliceArray(0..15)
-            val encrypted = combined.sliceArray(16 until combined.size)
-            
-            val cipher = Cipher.getInstance(TRANSFORMATION)
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(iv))
-            
-            val decryptedBytes = cipher.doFinal(encrypted)
-            String(decryptedBytes)
-        } catch (e: Exception) {
-            "aes_decryption_failed"
-        }
-    }
-    
-    private fun mockDecrypt(encryptedText: String, keyString: String): String {
-        return try {
-            val keyHash = MessageDigest.getInstance("SHA-256").digest(keyString.toByteArray())
-            val combined = Base64.decode(encryptedText, Base64.NO_WRAP)
-            
-            // Skip IV (first 16 bytes)
-            val encrypted = combined.sliceArray(16 until combined.size)
-            
-            // Reverse the XOR operation
-            val decrypted = ByteArray(encrypted.size)
-            for (i in encrypted.indices) {
-                val keyByte = keyHash[i % keyHash.size]
-                decrypted[i] = (encrypted[i].toInt() xor keyByte.toInt()).toByte()
-            }
-            
-            // Remove PKCS7 padding
-            val paddingLength = decrypted.last().toInt()
-            val unpaddedSize = decrypted.size - paddingLength
-            
-            String(decrypted.sliceArray(0 until unpaddedSize))
-        } catch (e: Exception) {
-            "mock_decryption_failed"
-        }
-    }
-    
-    fun encryptWithStringKey(plaintext: String, keyString: String): String {
-        return try {
-            val digest = MessageDigest.getInstance("SHA-256")
-            val keyBytes = digest.digest(keyString.toByteArray())
-            val secretKey = SecretKeySpec(keyBytes, ALGORITHM)
-            
-            val cipher = Cipher.getInstance(TRANSFORMATION)
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-            
-            val iv = cipher.iv
-            val encryptedBytes = cipher.doFinal(plaintext.toByteArray())
-            
-            val combined = iv + encryptedBytes
-            Base64.encodeToString(combined, Base64.NO_WRAP)
-        } catch (e: Exception) {
-            "encryption_failed"
-        }
-    }
-    
-    fun decryptWithKeyAndIv(encryptedText: String, keyString: String, ivString: String): String {
-        return try {
+    fun decryptWithKeyAndIv(encryptedText: String, keyString: String, ivString: String) {
+        try {
             // Pad key to 16 bytes if needed
             val keyBytes = keyString.toByteArray().let { bytes ->
                 when {
@@ -209,42 +129,7 @@ object CryptoUtils {
             val cipher = Cipher.getInstance(TRANSFORMATION)
             cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec)
             
-            val decryptedBytes = cipher.doFinal(encryptedBytes)
-            String(decryptedBytes)
-        } catch (e: Exception) {
-            "key_iv_decryption_failed"
-        }
-    }
-    
-    fun encryptWithKeyAndIv(plaintext: String, keyString: String, ivString: String): String {
-        return try {
-            // Pad key to 16 bytes if needed
-            val keyBytes = keyString.toByteArray().let { bytes ->
-                when {
-                    bytes.size == 16 -> bytes
-                    bytes.size < 16 -> bytes + ByteArray(16 - bytes.size)
-                    else -> bytes.sliceArray(0..15)
-                }
-            }
-            val secretKey = SecretKeySpec(keyBytes, ALGORITHM)
-            
-            // Pad IV to 16 bytes if needed
-            val ivBytes = ivString.toByteArray().let { bytes ->
-                when {
-                    bytes.size == 16 -> bytes
-                    bytes.size < 16 -> bytes + ByteArray(16 - bytes.size)
-                    else -> bytes.sliceArray(0..15)
-                }
-            }
-            val ivSpec = IvParameterSpec(ivBytes)
-            
-            val cipher = Cipher.getInstance(TRANSFORMATION)
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec)
-            
-            val encryptedBytes = cipher.doFinal(plaintext.toByteArray())
-            Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
-        } catch (e: Exception) {
-            "key_iv_encryption_failed"
-        }
+            cipher.doFinal(encryptedBytes)
+        } catch (e: Exception) { }
     }
 }
