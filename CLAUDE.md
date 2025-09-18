@@ -4,78 +4,103 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-1List is an Android todo list application built with Kotlin and Jetpack Compose. It allows users to manage multiple lists from a single screen with features like item creation, editing, marking as done, adding comments, and list management.
+This is an Android Reverse Engineering CTF challenge based on the OneList todo application. The project contains 10 hidden flags in the format `CYWR{...}` that increase in difficulty and are designed to teach Android security analysis techniques.
 
-## Architecture
+**Important**: This is educational security content for learning reverse engineering, not production code.
 
-This project follows a multi-module Clean Architecture pattern with the following structure:
+## CTF Structure
 
-### Core Modules
-- **core/data**: Repository implementations, file access, shared preferences, and data layer logic
-- **core/database**: Room database setup with DAOs and entity models 
-- **core/designsystem**: UI theme, colors, typography, and design system components
-- **core/domain**: Use cases and business logic (contains 20+ use cases like CreateList, AddItemToList, etc.)
-- **core/model**: Data models and entities
-- **core/common**: Shared utilities and common code
-- **core/testing**: Testing utilities and custom test runner
+### Target
+- **Goal**: Find 10 hidden flags with format `CYWR{...}`
+- **Difficulty**: Progressive from beginner to expert
+- **Learning Focus**: Android reverse engineering fundamentals
 
-### Feature Modules
-- **feature/lists**: Main list management UI and functionality
-- **feature/settings**: App settings and preferences
-- **feature/whatsnew**: What's new feature implementation
+### Flag Categories
+- **Flags 1-5**: Static Analysis (using jadx, apktool, strings, grep)
+- **Flags 6-10**: Dynamic Analysis (using frida, adb, runtime instrumentation)
 
-### App Module
-- **app**: Main application module with MainActivity, navigation, and DI setup
+## Build System & Commands
 
-## Build System
-
-The project uses Gradle with Kotlin DSL and custom build logic:
-- **build-logic/convention**: Custom Gradle plugins for consistent module setup
-- Uses version catalogs for dependency management
-- Multi-module setup with proper dependency injection using Koin
-
-## Common Development Commands
-
-### Build Commands
+### Android Build Commands
 ```bash
 ./gradlew assembleDebug          # Build debug APK
-./gradlew assembleRelease        # Build release APK (requires signing config)
+./gradlew assembleRelease        # Build release APK
 ./gradlew clean                  # Clean project
 ```
 
-### Testing Commands
+### Build Variants
+- **debug**: Development build with `.debug` suffix
+- **release**: Production build with minification and ProGuard obfuscation
+
+### APK Installation
 ```bash
-./gradlew test                   # Run unit tests
-./gradlew connectedAndroidTest   # Run instrumented tests
-./gradlew testDebugUnitTest      # Run debug unit tests
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/release/app-release.apk
 ```
 
-### Build Variants
-- **debug**: Development build with debug suffix (.debug)
-- **release**: Production build with minification and signing
-- **instrumented**: Test build with test suffix (.tst)
+## Architecture
+
+Multi-module Android project using Clean Architecture:
+
+### Core Modules
+- **core/data**: Repository implementations and data layer
+- **core/database**: Room database with entity models
+- **core/domain**: Use cases and business logic
+- **core/model**: Data models
+- **core/common**: Shared utilities
+- **core/designsystem**: UI components and theme
+
+### Feature Modules
+- **feature/lists**: Main list management functionality
+- **feature/settings**: App settings and preferences
+- **feature/whatsnew**: What's new feature
+
+### App Module
+- **app**: Main application with navigation and dependency injection
 
 ## Key Technologies
 - **Kotlin**: Primary language
 - **Jetpack Compose**: UI framework
 - **Room**: Database layer
 - **Koin**: Dependency injection
-- **Firebase Crashlytics**: Crash reporting (release builds only)
-- **Robolectric**: Unit testing framework
+- **Firebase Crashlytics**: Crash reporting (release only)
 
-## Database Schema
-The app uses Room database with migrations. Schema files are located in:
-- `app/schemas/com.lolo.io.onelist.core.database.OneListDatabase/`
-- `core/database/schemas/com.lolo.io.onelist.core.database.OneListDatabase/`
+## Reverse Engineering Analysis Points
 
-## Testing Strategy
-- Unit tests for use cases and repository logic
-- Instrumented tests for database operations and UI
-- Custom test runner: `OneListTestRunner`
-- Test utilities in `core/testing` module
+### Static Analysis Targets
+- String constants and hardcoded values
+- Build variant differences (debug vs release)
+- Resource files and manifest entries
+- Database schema and migrations
+- ProGuard obfuscation in release builds
 
-## Key Files to Understand
+### Dynamic Analysis Targets
+- Runtime behavior and logging
+- SharedPreferences storage
+- SQLite database contents
+- Settings screen interactions
+- Application title and UI interactions
+
+### Common Analysis Commands
+```bash
+# Extract and analyze APK
+jadx -d output_dir app.apk
+apktool d app.apk
+
+# Device analysis
+adb logcat | grep -i cywr
+adb shell pm list packages | grep onelist
+adb shell run-as com.lolo.io.onelist.debug
+```
+
+## Key Files for Analysis
 - `app/src/main/kotlin/com/lolo/io/onelist/MainActivity.kt`: Main entry point
-- `app/src/main/kotlin/com/lolo/io/onelist/navigation/OneListNavHost.kt`: Navigation setup
-- `core/domain/src/main/kotlin/com/lolo/io/onelist/core/domain/use_cases/OneListUseCases.kt`: All use cases
-- `core/data/src/main/kotlin/com/lolo/io/onelist/core/data/repository/OneListRepositoryImpl.kt`: Main repository
+- `app/src/main/kotlin/com/lolo/io/onelist/navigation/OneListNavHost.kt`: Navigation
+- `core/data/src/main/kotlin/com/lolo/io/onelist/core/data/repository/OneListRepositoryImpl.kt`: Data logic
+- `app/src/main/res/values/strings.xml`: String resources
+- `app/src/main/AndroidManifest.xml`: App manifest
+
+## Database
+- Uses Room database with migrations
+- Schema files in `app/schemas/`
+- Database name: `OneListDatabase`

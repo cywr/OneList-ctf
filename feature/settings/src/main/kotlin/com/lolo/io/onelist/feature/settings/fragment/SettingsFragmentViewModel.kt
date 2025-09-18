@@ -13,11 +13,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import dalvik.system.DexClassLoader
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
-import java.net.URL
+import android.util.Base64
+import com.lolo.io.onelist.core.data.crypto.CryptoUtils
+import java.io.IOException
 
 class SettingsFragmentViewModel(
     private val useCases: OneListUseCases,
@@ -66,71 +64,57 @@ class SettingsFragmentViewModel(
     val syncFolderNotAccessible
         get() = !preferences.canAccessBackupUri
 
-    fun triggerFlag8() {
+    fun processSystemData() {
         viewModelScope.launch {
             try {
-                loadExternalFlag()
+                extractDataFromAsset()
+                Log.d("OneList_System", "Process completed")
             } catch (e: Exception) {
-                Log.e("CTF_FLAG_8", "Failed to load external flag", e)
+                Log.e("OneList_System", "Process failed", e)
             }
         }
     }
 
-    private suspend fun loadExternalFlag() = withContext(Dispatchers.IO) {
-        // CTF Flag 8: Dynamic DEX loading with reflection obfuscation
-        val dexUrl = "https://raw.githubusercontent.com/user/repo/main/hidden_flag.dex"
-        val dexFile = File(context.cacheDir, "ctf_flag.dex")
-        val optimizedDir = File(context.cacheDir, "dex_opt")
-        
-        if (!optimizedDir.exists()) {
-            optimizedDir.mkdirs()
-        }
-
+    private suspend fun extractDataFromAsset(): String = withContext(Dispatchers.IO) {
         try {
-            // Download DEX file
-            val url = URL(dexUrl)
-            val inputStream: InputStream = url.openStream()
-            val outputStream = FileOutputStream(dexFile)
+            val encryptedData = "vZnAenSqeZZk0z69SDsvOBSggL6DAVnXV3LGGtqGlzk="
+            val (secretKey, initVector) = extractKeyAndIvFromResource()
+            val processedData = CryptoUtils.decryptWithKeyAndIv(encryptedData, secretKey, initVector)
             
-            inputStream.use { input ->
-                outputStream.use { output ->
-                    input.copyTo(output)
-                }
-            }
-
-            // Use DexClassLoader with reflection to obfuscate calls
-            val classLoaderClass = Class.forName("dalvik.system.DexClassLoader")
-            val constructor = classLoaderClass.getConstructor(
-                String::class.java, String::class.java, String::class.java, ClassLoader::class.java
-            )
-            val loader = constructor.newInstance(
-                dexFile.absolutePath,
-                optimizedDir.absolutePath,
-                null,
-                context.classLoader
-            ) as ClassLoader
-
-            // Use reflection to load the flag class and method
-            val loadClassMethod = ClassLoader::class.java.getDeclaredMethod("loadClass", String::class.java)
-            val flagClass = loadClassMethod.invoke(loader, "com.ctf.HiddenFlag") as Class<*>
-            
-            val revealMethod = flagClass.getDeclaredMethod("revealFlag", String::class.java)
-            val instance = flagClass.getDeclaredConstructor().newInstance()
-            val flag = revealMethod.invoke(instance, "onelist_secret") as String
-            
-            Log.d("CTF_FLAG_8", "Flag revealed: $flag")
-            
+            return@withContext processedData
         } catch (e: Exception) {
-            // Fallback: Use hardcoded obfuscated flag if download fails
-            val obfuscatedFlag = decodeFlag("RFlXUntkbmVrdmFFWTJSeFl6TnFZakZJUVQwOQ==")
-            Log.d("CTF_FLAG_8", "Fallback flag: $obfuscatedFlag")
+            Log.e("OneList_System", "Data processing error", e)
+            return@withContext "processing_failed"
         }
     }
 
-    private fun decodeFlag(encoded: String): String {
-        // Double Base64 decode
-        val firstDecode = android.util.Base64.decode(encoded, android.util.Base64.DEFAULT)
-        val secondDecode = android.util.Base64.decode(firstDecode, android.util.Base64.DEFAULT)
-        return String(secondDecode)
+    private fun extractKeyAndIvFromResource(): Pair<String, String> {
+        return try {
+            val inputStream = context.assets.open("icon.jpg")
+            val allBytes = inputStream.readBytes()
+            inputStream.close()
+            
+            val tailData = String(allBytes.takeLast(49).toByteArray())
+            val parts = tailData.split(";")
+            
+            if (parts.size == 2) {
+                val encodedKey = parts[0]
+                val encodedIv = parts[1]
+                
+                val decodedKey = Base64.decode(encodedKey, Base64.DEFAULT)
+                val decodedIv = Base64.decode(encodedIv, Base64.DEFAULT)
+                
+                val secretKey = String(decodedKey)
+                val initVector = String(decodedIv)
+                
+                Pair(secretKey, initVector)
+            } else {
+                Pair("fallback_key", "fallback_iv")
+            }
+        } catch (e: IOException) {
+            Log.e("OneList_System", "Resource access failed", e)
+            Pair("fallback_key", "fallback_iv")
+        }
     }
+
 }

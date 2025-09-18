@@ -45,7 +45,7 @@
         android:title="@string/about">
         <Preference
             android:key="version"
-            android:selectable="false"
+            android:selectable="true"
             android:title="@string/app_version" />
         <Preference
             android:key="releaseNote"

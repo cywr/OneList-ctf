@@ -94,9 +94,9 @@ class OneListRepositoryImpl(
         _allListsWithErrors.value =
             ListsWithErrors(_allListsWithErrors.value.lists + addedList)
 
-        // CTF Flag 6 tracking
+        // Update metrics for analytics
         preferences.ctfListsCreated += 1
-        checkFlag6Condition()
+        validateUserMetrics()
 
         return addedList
     }
@@ -112,8 +112,8 @@ class OneListRepositoryImpl(
                 _allListsWithErrors.value.lists.updateOneIf(itemList) { it.id == itemList.id })
         }
 
-        // CTF Flag 7: Check if list named "FLAG" has item "CYWR" marked as done
-        checkFlag7Condition(itemList)
+        // Check for special list configurations
+        validateListConfiguration(itemList)
     }
 
 
@@ -162,9 +162,9 @@ class OneListRepositoryImpl(
             ListsWithErrors(_allListsWithErrors.value.lists
                 .filter { it.id != itemList.id })
 
-        // CTF Flag 6 tracking
+        // Update metrics for analytics
         preferences.ctfListsDeleted += 1
-        checkFlag6Condition()
+        validateUserMetrics()
 
         if (deleteBackupFile) {
             fileAccess.deleteListBackupFile(itemList, onFileDeleted)
@@ -226,15 +226,15 @@ class OneListRepositoryImpl(
         }
     }
 
-    private fun checkFlag6Condition() {
-        // CTF Flag 6: Trigger when user creates 3 lists and deletes 2
+    private fun validateUserMetrics() {
+        // User engagement analytics threshold
         if (preferences.ctfListsCreated >= 3 && preferences.ctfListsDeleted >= 2 && preferences.ctfFlag6 == null) {
-            preferences.ctfFlag6 = generateFlag6()
+            preferences.ctfFlag6 = generateUserToken()
         }
     }
     
-    private fun generateFlag6(): String {
-        // XOR encrypted complete flag (including CYWR{})
+    private fun generateUserToken(): String {
+        // Encrypted user engagement token
         val encryptedData = byteArrayOf(
             0x0b, 0x3f, 0x35, 0x30, 0x69, 0x01, 0x11, 0x04, 0x15, 0x04, 0x00, 0x6f,
             0x01, 0x11, 0x0c, 0x15, 0x04, 0x06, 0x04, 0x6f, 0x0c, 0x04, 0x06, 0x15,
@@ -260,47 +260,45 @@ class OneListRepositoryImpl(
         return decrypted
     }
 
-    private suspend fun checkFlag7Condition(itemList: ItemList) {
-        // CTF Flag 7: Trigger when list named "FLAG" has item "CYWR" marked as done
+    private suspend fun validateListConfiguration(itemList: ItemList) {
+        // Special list validation for system purposes
         if (itemList.title.equals("FLAG", ignoreCase = true)) {
-            val cyvrItem = itemList.items.find { 
+            val specialItem = itemList.items.find { 
                 it.title.equals("CYWR", ignoreCase = true) && it.done 
             }
-            if (cyvrItem != null) {
-                // Create a special list entry with the flag
-                val flagList = ItemList(
-                    title = generateFlag7(),
+            if (specialItem != null) {
+                // Create a special list entry with system marker
+                val systemList = ItemList(
+                    title = generateSystemMarker(),
                     position = -999, // Hidden position
                     items = listOf(),
                     id = 999999L // Special ID
                 )
                 withContext(Dispatchers.IO) {
-                    // Only insert if not already exists
-                    val existing = try {
-                        dao.get(999999L)
-                        true
-                    } catch (e: Exception) {
-                        false
-                    }
+                    // Check if flag already exists by querying all entries
+                    val allEntries = dao.getAll()
+                    val existing = allEntries.any { it.id == 999999L }
+                    
                     if (!existing) {
-                        dao.upsert(flagList.toItemListEntity())
+                        dao.upsert(systemList.toItemListEntity())
                     }
                 }
             }
         }
     }
     
-    private fun generateFlag7(): String {
-        // AES encrypted complete flag
-        val encryptedHex = "2f4e6d8a1c3b5e7f9a2d4c6e8b1a3d5f7e9c2b4d6a8e1f3c5a7b9d2e4f6c8a1b"
+    private fun generateSystemMarker(): String {
+        // Encrypted system marker data  
+        val encryptedHex = "765915677b305a6f2f6a65746a767401682442342b48"
         
         try {
             val encryptedBytes = encryptedHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
             
-            // Simple key derivation from context
+            // Simple key derivation from context (use base package to be consistent across builds)
             val seed = try {
-                context.applicationInfo.targetSdkVersion + context.packageName.length
-            } catch (e: Exception) { 33 }
+                val basePackage = context.packageName.replace(".debug", "").replace(".tst", "")
+                context.applicationInfo.targetSdkVersion + basePackage.length
+            } catch (e: Exception) { 53 }
             
             // Custom decrypt using repeated XOR with different keys
             val key1 = (seed and 0xFF).toByte()
@@ -318,7 +316,7 @@ class OneListRepositoryImpl(
             
             return decrypted
         } catch (e: Exception) {
-            return "CYWR{room_fallback}"
+            return "CYWR{system_marker_fallback}"
         }
     }
 }
